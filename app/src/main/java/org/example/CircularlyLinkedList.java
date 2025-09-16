@@ -56,4 +56,17 @@ public class CircularlyLinkedList<E> {
         size--;
         return head.getElement();
     }
+
+    // returns the element at the specified index (0-based from head) without modifying the list
+    public E get(int index) {
+        if (isEmpty()) return null;
+        // normalize index in case it's larger than size
+        index = index % size;
+        if (index < 0) index += size;
+        Node<E> current = tail.getNext(); // head
+        for (int i = 0; i < index; i++) {
+            current = current.getNext();
+        }
+        return current.getElement();
+    }
 }
