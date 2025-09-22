@@ -1,18 +1,19 @@
 package org.example;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Random;
+import java.util.Scanner;
 
 public class App {
     public static void main(String[] args) {
         CircularlyLinkedList<Space> board = new CircularlyLinkedList<>();
-
         String path = "../monopoly_spaces.txt";
+
+        // Load board from file
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             String line;
             while ((line = br.readLine()) != null) {
-                // skip empty lines
                 if (line.trim().isEmpty()) continue;
                 board.addLast(new Space(line.trim()));
             }
@@ -21,27 +22,46 @@ public class App {
             return;
         }
 
-        // Verify head (first) and tail (last)
-        Space head = board.first();
-        Space tail = board.last();
+        System.out.println("Monopoly board loaded! Head: " + board.first() + ", Tail: " + board.last());
 
-        System.out.println("Head (should be 'Go'): " + (head != null ? head.getName() : "null"));
-        System.out.println("Tail (should be 'Boardwalk'): " + (tail != null ? tail.getName() : "null"));
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            System.out.println("\nChoose an action:");
+            System.out.println("1) Print all spaces");
+            System.out.println("2) Roll dice and move");
+            System.out.println("3) Step forward one space");
+            System.out.println("4) Exit");
 
-        // Roll two dice and determine landing space from 'Go' (index 0)
-        int die1 = rollDie();
-        int die2 = rollDie();
-        int steps = die1 + die2;
-        System.out.println("Rolled: " + die1 + " + " + die2 + " = " + steps);
+            System.out.print("> ");
+            String input = scanner.nextLine().trim();
 
-        // starting from head (index 0)
-        Space landed = board.get(steps % board.size());
-        System.out.println("Landed on: " + (landed != null ? landed.getName() : "null"));
+            switch (input) {
+                case "1":
+                    printBoard(board);
+                    break;
+                case "2":
+                    Space landed = board.advanceByDice();
+                    System.out.println("Landed on: " + landed.getName());
+                    break;
+                case "3":
+                    board.rotate();
+                    System.out.println("Stepped forward. Current space: " + board.first().getName());
+                    break;
+                case "4":
+                    System.out.println("Exiting...");
+                    return;
+                default:
+                    System.out.println("Invalid option. Try again.");
+            }
+        }
     }
 
-    private static final Random RNG = new Random();
-
-    private static int rollDie() {
-        return RNG.nextInt(6) + 1;
+    private static void printBoard(CircularlyLinkedList<Space> board) {
+        System.out.println("\nMonopoly Board Spaces:");
+        Node<Space> current = board.getTail().getNext(); // head
+        for (int i = 0; i < board.size(); i++) {
+            System.out.println((i + 1) + ": " + current.getElement().getName());
+            current = current.getNext();
+        }
     }
 }
